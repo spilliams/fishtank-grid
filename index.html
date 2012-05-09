@@ -1,0 +1,122 @@
+<!DOCTYPE>
+<html>
+<head>
+  <title>barleyboard</title>
+  <style type='text/css'>
+    #window {
+      width: 90%;
+      height: 90%;
+      margin: 2em auto;
+    }
+    .item {
+      display: inline-block;
+      float: left;
+    }
+  </style>
+  <script src="jquery.min.js"></script>
+  <script type='text/javascript'>
+    var grades = [
+      {
+        itemMinWidth:200,
+        itemMaxWidth:300,
+        itemHeight:100,
+        css:{
+          'background':'green'
+        }
+      },
+      {
+        itemMinWidth:200,
+        itemMaxWidth:300,
+        itemHeight:75,
+        css:{
+          'background':'yellow'
+        }
+      },
+      {
+        itemMinWidth:200,
+        itemMaxWidth:300,
+        itemHeight:50,
+        css:{
+          'background':'red'
+        }
+      },
+      {
+        itemMinWidth:50,
+        itemMaxWidth:100,
+        itemHeight:50,
+        css:{
+          'background':'black'
+        }
+      }
+    ];
+    var gutter = 30;
+    $(document).ready(function(){
+      resize();
+      window.onresize = function(){
+        resize();
+      };
+    });
+    function log(m) {
+      if (console && console.log)
+        console.log(m);
+    }
+    function resize() {
+      for (i=0; i < grades.length; i++) {
+        grade = grades[i];
+        // how many items per row?
+        log("checking grade ["+grade.itemMinWidth+","+grade.itemMaxWidth+"]x"+grade.itemHeight);
+        numItemsPerRow = 1+Math.floor(($("#window").width() - grade.itemMinWidth)/(gutter+grade.itemMinWidth));
+        log("  "+numItemsPerRow+" items per row");
+        // how many rows?
+        numItems = $(".item").length;
+        numRowsExactly = numItems/numItemsPerRow;
+        numRows = Math.floor(numRowsExactly);
+        if (numRowsExactly>numRows)
+          numRows++;
+        log("  "+numRows+" rows");
+        // height check
+        overheight = numRows*(grade.itemHeight+gutter)-gutter > $("#window").height();
+        last = i == grades.length-1;
+        if (overheight && !last) {
+          log("  downgrading");
+          continue;
+        } else {
+          if (overheight) {
+            log("  last grade, still overheight. rendering anyway!");
+          }
+          itemWidth = Math.floor(($("#window").width() - ((numItemsPerRow-1)*gutter))/numItemsPerRow);
+          log("  render items at "+itemWidth+"x"+grade.itemHeight);
+          itemWidth = itemWidth+'px';
+          itemHeight = grade.itemHeight+'px';
+          // items get size, default item gets margin
+          $(".item").css({'width':itemWidth,'height':itemHeight,'margin':gutter/2+'px'})
+          // items on the edge of the grid get no margin for that side
+          $(".item:nth-child("+numItemsPerRow+"n)").css({'margin-right':0});
+          $(".item:nth-child("+numItemsPerRow+"n+1)").css({'margin-left':0});
+          $(".item:nth-child(-n+"+numItemsPerRow+")").css({'margin-top':0});
+          $(".item:nth-child(n+"+(numItemsPerRow*(numRows-1)+1)+")").css({'margin-bottom':0});
+          // items get style!
+          $.each(grade.css,function(i,e){
+            $(".item").css(i,e);
+          });
+          break;
+        }
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id='window'>
+    <div class="item">item</div>
+    <div class="item">item</div>
+    <div class="item">item</div>
+    <div class="item">item</div>
+    <div class="item">item</div>
+    <div class="item">item</div>
+    <div class="item">item</div>
+    <div class="item">item</div>
+    <div class="item">item</div>
+    <div class="item">item</div>
+  </div>
+</body>
+</html>
